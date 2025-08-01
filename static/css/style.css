@@ -1,0 +1,96 @@
+
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Press Start 2P', cursive;
+    background: black;
+}
+
+#game {
+    display: block;
+    margin: 0 auto;
+    background-color: black;
+    border-bottom: 4px solid #444;
+}
+
+#nn-canvas {
+    display: block;
+    margin: 20px auto;
+    background: #f9f9f9;
+    border: 1px solid #ccc;
+    width: 600px;
+    height: 360px; 
+}
+
+.legend-box {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+    background: white;
+    border: 1px solid #aaa;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+.legend-box ul {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 6px;
+}
+
+.legend-box li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.legend-box .line,
+.legend-box .dot {
+    display: inline-block;
+    width: 18px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 4px;
+}
+
+.legend-box .line.blue {
+    background: blue;
+}
+
+.legend-box .line.red {
+    background: red;
+}
+
+.legend-box .dot.black {
+    background: black;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-box .dot.green {
+    background: green;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-box .dot.red-dot {
+    background: darkred;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-box .weight {
+    background: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: monospace;
+    margin-right: 8px;
+}
