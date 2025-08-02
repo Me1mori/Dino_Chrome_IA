@@ -21,23 +21,32 @@ Este proyecto permite jugar manualmente o dejar que una IA aprenda a esquivar lo
 DINO_CON_IA/
 │
 ├── LICENSE               # Licencia MIT personalizada
-├── README.md             # Este archivo
-├── app.py                # Servidor Flask
-├── static/
-│   ├── css/style.css     # Estilos del juego
-│   ├── fonts/            # Tipografías usadas
-│   ├── img/              # Imágenes del proyecto
-│   ├── js/               # game.js y ai.js
-│   └── sounds/           # Efectos de sonido
-└── templates/
-    └── index.html        # Página principal del juego
+├── README.md             # Documentación del proyecto
+├── vercel.json           # Configuración para desplegar en Vercel
+├── .gitignore            # Ignora archivos innecesarios para Git
+│
+├── backend/
+│   ├── app.py                      # Servidor Flask principal
+│   ├── requirements.txt            # Dependencias de Python
+│   │
+│   ├── static/
+│   │   ├── css/                    # Estilos del juego
+│   │   ├── fonts/                  # Tipografías usadas
+│   │   ├── img/                    # Imágenes como sprites
+│   │   ├── js/
+│   │   │   ├── game.js             # Lógica del juego
+│   │   │   └── ai.js               # Inteligencia artificial del Dino
+│   │   └── sounds/                 # Efectos de sonido
+│   │
+│   └── templates/
+│       └── index.html             # Página principal renderizada por Flask
 ```
 
 ---
 
 ## 🧠 ¿Cómo ejecutar el juego localmente?
 
-1. Instala Python 3 (si no lo tienes ya).
+1. Instala Python 3.11.* (si no lo tienes ya).
 2. Instala Flask:
 
 ```bash
@@ -47,7 +56,7 @@ pip install flask
 3. Ejecuta el servidor:
 
 ```bash
-python app.py
+python backend/app.py
 ```
 
 4. Abre tu navegador en:  
@@ -77,4 +86,4 @@ python app.py
 
 ## 📬 Contacto
 
-Proyecto creado por **[Me1mori]**.
+Proyecto creado por **Me1mori**.

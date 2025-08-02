@@ -22,9 +22,20 @@ SOFTWARE.
 
 ---
 
-⚠️ **Aviso importante sobre los sprites y recursos gráficos:**
+⚠️ Important notice about sprites and graphical assets:
 
-Este proyecto incluye imágenes y sprites que han sido extraídos del juego original **Chrome Dino**, el cual es propiedad de **Google Inc.**.  
+This project includes images and sprites that were extracted from the original **Chrome Dino** game, which is the property of **Google Inc.**  
+These assets are included for **educational and non-commercial purposes only**.
+
+**You are not allowed to use these sprites in commercial products** or redistribute them separately.
+
+If you plan to publish or redistribute this project, it is recommended that you create and use your own original assets.
+
+---
+
+⚠️ Aviso importante sobre los sprites y recursos gráficos:
+
+Este proyecto incluye imágenes y sprites que han sido extraídos del juego original **Chrome Dino**, el cual es propiedad de **Google Inc.**  
 Estos recursos se incluyen únicamente con fines **educativos y no comerciales**.
 
 **No tienes permitido utilizar los sprites de este proyecto en productos comerciales** ni redistribuirlos por separado.
