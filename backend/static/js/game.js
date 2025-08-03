@@ -21,10 +21,39 @@ let score = 0, highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let playerHighScore = localStorage.getItem("playerHighScore") || 0;
 let aiHighScore = localStorage.getItem("aiHighScore") || 0;
 
+let animationId = null;
+let paused = true;
+
 const sprite = new Image();
 sprite.src = "/static/img/descarga.png";
 
-// ===================== Suelo (GROUND)=====================
+// ===================== Crear botón de reload =====================
+const reloadBtn = document.createElement("canvas");
+reloadBtn.width = 37;
+reloadBtn.height = 33;
+reloadBtn.style.position = "fixed";
+reloadBtn.style.top = "80%";
+reloadBtn.style.left = "50%";
+reloadBtn.style.transform = "translateX(-50%)";
+reloadBtn.style.zIndex = "20";
+reloadBtn.style.display = "none";
+reloadBtn.style.cursor = "pointer";
+document.body.appendChild(reloadBtn);
+
+const reloadCtx = reloadBtn.getContext("2d");
+
+// Dibuja el ícono del sprite en el canvas del botón
+function drawReloadIcon() {
+    reloadCtx.clearRect(0, 0, reloadBtn.width, reloadBtn.height);
+    reloadCtx.drawImage(sprite, 2, 2, 37, 33, 0, 0, 37, 33);
+}
+
+// Acción al hacer clic
+reloadBtn.onclick = () => {
+    resetGame();
+};
+
+// ===================== Suelo (GROUND) =====================
 const ground = {
     y: canvas.height - 45, // la altura real del sprite
     scrollX: 0,
@@ -173,7 +202,7 @@ class Obstacle {
             this.sh = 51;
             this.w = 25;
             this.h = 51;
-            this.yOffset = 10;  // bajar 10px
+            this.yOffset = 15;  // bajar 10px
         } else {
             this.sx = 228;
             this.sy = 2;
@@ -181,7 +210,7 @@ class Obstacle {
             this.sh = 36;
             this.w = 17;
             this.h = 36;
-            this.yOffset = 5;  // bajar 5px
+            this.yOffset = 7;  // bajar 5px
         }
 
         this.x = canvas.width;
@@ -247,9 +276,16 @@ function collide(a, b) {
 // ===================== IA =====================
 function getAIInputs(dino) {
     const next = obstacles[0];
-    if (!next) return [0, 0, 0, 0, dino.grounded ? 1 : 0];
-    const dist = next.x - dino.x;
-    return [dist, gameSpeed, 0, next.h, dino.grounded ? 1 : 0];
+    if (!next) return [0, 0, 0, 0, 0, 0];
+
+    const distToObstacle = next.x - dino.x;
+    const currentSpeed = gameSpeed;
+    const verticalSpeed = dino.vy;
+    const obstacleHeight = next.h;
+    const obstacleWidth = next.w;
+    const isGrounded = dino.grounded ? 1 : 0;
+
+    return [distToObstacle, currentSpeed, verticalSpeed, obstacleHeight, obstacleWidth, isGrounded];
 }
 
 function handleAI(dino) {
@@ -345,6 +381,11 @@ function resetGame() {
     update(); // ← inicia de cero
 }
 
+function updateUI() {
+    // Mostrar/ocultar botón de reload solo cuando pierdes
+    reloadBtn.style.display = gameOver ? "block" : "none";
+}
+
 // Arregla error de red neuronal vacía
 function drawNeuralNetworkSafe(brain) {
     if (!brain || !brain.weights || brain.weights.length === 0) return;
@@ -353,6 +394,8 @@ function drawNeuralNetworkSafe(brain) {
 
 // Actualizar juego
 function update() {
+    if (paused) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     frame++;
 
@@ -370,7 +413,7 @@ function update() {
 
         dinos.forEach(dino => {
             if (!dino.dead) {
-                dino.update(dino === best); 
+                dino.update(dino === best);
                 dino.draw();
             }
         });
@@ -423,6 +466,22 @@ function update() {
     } else {
         drawGameOver();
     }
+
+    if (gameOver) {
+        reloadBtn.style.display = "block";
+        drawReloadIcon();
+
+        // Posicionar el botón debajo de "Game Over"
+        const goX = canvas.offsetLeft + canvas.width / 2 - reloadBtn.width / 2;
+        const goY = canvas.offsetTop + 120;
+
+        reloadBtn.style.position = "absolute";
+        reloadBtn.style.left = `${goX}px`;
+        reloadBtn.style.top = `${goY}px`
+    } else {
+        reloadBtn.style.display = "none";
+    }
+
     if (nnCanvas) {
         nnCanvas.style.display = useAI ? "block" : "none";
     }
@@ -440,29 +499,69 @@ document.addEventListener("keydown", e => {
     }
 });
 
+document.body.addEventListener("click", () => {
+    if (gameOver) return;
+    paused = false;
+    if (!animationId) {
+        animationId = requestAnimationFrame(update); // ← importante
+    }
+
+    updateUI();
+});
+
+document.body.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // Evita el zoom o scroll
+    if (gameOver) {
+        resetGame();
+        return;
+    }
+
+    paused = false;
+    if (!animationId) {
+        animationId = requestAnimationFrame(update);
+    }
+
+    if (!useAI) {
+        dino.jump();
+    }
+
+    updateUI();
+}, { passive: false });
+
 // ===================== UI =====================
-const uiDiv = document.createElement("div");
-uiDiv.style.position = "fixed";
-uiDiv.style.top = "10px";
-uiDiv.style.left = "10px";
-uiDiv.style.zIndex = "10";
-uiDiv.innerHTML = `
-    <button id="aiBtn">Activar IA</button>
-    <button id="restartBtn">Reiniciar</button>
-`;
-
-document.body.appendChild(uiDiv);
-
 document.getElementById("aiBtn").onclick = () => {
     useAI = !useAI;
     document.getElementById("aiBtn").innerText = useAI ? "Desactivar IA" : "Activar IA";
-    resetGame();  // ← ya hace todo correctamente ahora
+    resetGame();  // 🔁 REINICIAR CON O SIN IA
 };
 
-document.getElementById("restartBtn").onclick = () => {
-    resetGame();
-};
+function resizeGameCanvas() {
+    const canvas = document.getElementById("game");
+    const rect = canvas.getBoundingClientRect();
+
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+}
+
 
 // ===================== INICIO =====================
-resetGame();
-if (animationId) cancelAnimationFrame(animationId);
+function resizeGameCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+}
+
+window.addEventListener("resize", () => {
+    resizeGameCanvas();
+    if (!paused && !gameOver) {
+        update();
+    }
+});
+
+window.onload = () => {
+    resizeGameCanvas(); // ✅ ahora sí se llama correctamente
+    resetGame();
+    paused = true;
+    update();
+    nnCanvas.style.display = "none";
+};

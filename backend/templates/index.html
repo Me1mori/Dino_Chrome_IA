@@ -9,23 +9,36 @@
 </head>
 
 <body>
-    <canvas id="game" width="950" height="200"></canvas>
-    <canvas id="nn-canvas" width="600" height="360"></canvas>
+    <canvas id="game"></canvas>
+    <div id="bottom-panel">
+        <button id="aiBtn">Activar IA</button>
 
-    <!-- IA primero, luego juego -->
-    <script src="{{ url_for('static', filename='js/ai.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
-    <div id="legend" class="legend-box" style="display: none;">
-        <p><strong>Leyenda (Red Neuronal)</strong></p>
-        <ul style="list-style-type: none; padding-left: 0;">
-            <li><span style="color: blue;">●</span> Peso positivo (línea azul)</li>
-            <li><span style="color: red;">●</span> Peso negativo (línea roja)</li>
-            <li><span style="color: black;">●</span> Activación nula (nodo negro)</li>
-            <li><span style="color: green;">●</span> Activación positiva (nodo verde)</li>
-            <li><span style="color: brown;">●</span> Activación negativa (nodo rojo)</li>
-        </ul>
+        <canvas id="nn-canvas" width="600" height="360"></canvas>
+
+        <div id="legend" class="legend-box" style="display: none">
+            <p><strong>Leyenda (Red Neuronal)</strong></p>
+            <ul style="list-style-type: none; padding-left: 0">
+                <li><span class="line blue"></span> Peso positivo (línea azul)</li>
+                <li><span class="line red"></span> Peso negativo (línea roja)</li>
+                <li><span class="dot black"></span> Activación nula (nodo negro)</li>
+                <li><span class="dot green"></span> Activación positiva (nodo verde)</li>
+                <li><span class="dot red-dot"></span> Activación negativa (nodo rojo)</li>
+            </ul>
+            <hr>
+            <p><strong>Entradas a la Red (inputLabels)</strong></p>
+            <ul>
+                <li><strong>D Obstacle</strong> : Distancia horizontal al obstáculo más cercano</li>
+                <li><strong>gameSpeed</strong> : Velocidad actual del juego</li>
+                <li><strong>V Speed</strong> : Velocidad vertical del dinosaurio</li>
+                <li><strong>obstacle H</strong> : Altura del obstáculo más cercano</li>
+                <li><strong>obstacle W</strong> : Ancho del obstáculo más cercano</li>
+                <li><strong>isGrounded</strong> : 1 si está en el suelo, 0 si está en el aire</li>
+            </ul>
+        </div>
     </div>
 
+    <script src="/static/js/game.js"></script>
+    <script src="/static/js/ai.js"></script>
 </body>
 
 </html>

@@ -1,13 +1,12 @@
 // ai.js
 
-const INPUT_SIZE = 5;
+const INPUT_SIZE = 6;
 const HIDDEN_SIZE = 6;
 const OUTPUT_SIZE = 1;
 
 const POPULATION_SIZE = 20;
 let brains = [];
 let bestBrain = null;
-let animationId = null;
 
 // ===== Red Neuronal =====
 class Brain {
@@ -173,8 +172,11 @@ function drawBrain(brain) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const layerY = [60, 180, 300];
-    const nodeX = (count) => Array.from({ length: count }, (_, i) => 60 + i * 70);
+    const layerY = [100, 200, 300]; 
+    const nodeX = (count, layerIndex) => {
+        const spacing = canvas.width / (count + 1);
+        return Array.from({ length: count }, (_, i) => spacing * (i + 1));
+    };
 
     const drawNode = (x, y, value, label = "") => {
         const r = 14;
@@ -192,8 +194,9 @@ function drawBrain(brain) {
 
         if (label) {
             ctx.fillStyle = "#000";
-            ctx.font = "10px monospace";
-            ctx.fillText(label, x - r, y - r - 2);
+            ctx.font = "11px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText(label, x, y - r - 6);
         }
     };
 
@@ -237,7 +240,15 @@ function drawBrain(brain) {
     }
 
     // nodos con valores reales
-    const inputLabels = ["x", "y", "dist", "obsW", "obsH", "vy"];
+    const inputLabels = [
+        "D Obstacle",
+        "gameSpeed",
+        "V Speed",
+        "obstacle H",
+        "obstacle W",
+        "isGrounded"
+    ];
+
     for (let i = 0; i < INPUT_SIZE; i++) {
         const val = brain.lastInput?.[i] ?? 0;
         drawNode(inputNodes[i], layerY[0], val, inputLabels[i] || "");
