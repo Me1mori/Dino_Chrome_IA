@@ -166,13 +166,17 @@ function evolve() {
 
 // Red neuronal 
 function drawBrain(brain) {
+    if (!brain.lastInput || !brain.lastHidden || !brain.lastOutput) {
+        return; // aún no se han generado activaciones
+    }
+
     const canvas = document.getElementById("nn-canvas");
     if (!canvas || !brain) return;
 
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const layerY = [100, 200, 300]; 
+    const layerY = [100, 200, 300];
     const nodeX = (count, layerIndex) => {
         const spacing = canvas.width / (count + 1);
         return Array.from({ length: count }, (_, i) => spacing * (i + 1));
@@ -263,4 +267,9 @@ function drawBrain(brain) {
         const val = brain.lastOutput?.[i] ?? 0;
         drawNode(outputNodes[i], layerY[2], val, ["↥", "↧"][i] || "O" + (i + 1));
     }
+}
+
+function drawBrainSafe(brain) {
+    if (!brain || !brain.w1 || !brain.w2) return;
+    drawBrain(brain);
 }

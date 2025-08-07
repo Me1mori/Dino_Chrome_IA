@@ -419,7 +419,7 @@ function update() {
         });
 
         for (let obs of obstacles) {
-            dinos.forEach(dino => {
+            for (let dino of dinos) {
                 if (!dino.dead && collide(dino.getBounds(), obs.getBounds())) {
                     dino.dead = true;
                     dino.brain.score = dino.score;
@@ -429,8 +429,9 @@ function update() {
                         localStorage.setItem("aiHighScore", aiHighScore);
                     }
                     if (currentAlive <= 0) evolve();
+                    break;
                 }
-            });
+            }
         }
 
         if (currentAlive <= 0) return; // detiene la lógica de IA si todos murieron
@@ -440,7 +441,7 @@ function update() {
         });
 
         drawLabels();
-        drawBrain(getBestAliveDino()?.brain);
+        drawBrainSafe(getBestAliveDino()?.brain);
 
     } else {
         dino.update();
@@ -532,7 +533,10 @@ document.body.addEventListener("touchstart", (e) => {
 document.getElementById("aiBtn").onclick = () => {
     useAI = !useAI;
     document.getElementById("aiBtn").innerText = useAI ? "Desactivar IA" : "Activar IA";
-    resetGame();  // 🔁 REINICIAR CON O SIN IA
+    if (!useAI) {
+        generation = 1;
+    }
+    resetGame();
 };
 
 function resizeGameCanvas() {
@@ -564,4 +568,5 @@ window.onload = () => {
     paused = true;
     update();
     nnCanvas.style.display = "none";
+    drawReloadIcon();
 };

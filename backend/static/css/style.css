@@ -1,10 +1,11 @@
 #game {
     width: 100%;
+    max-height: 350px;
     height: 30vh;
-    max-height: 300px;
-    aspect-ratio: 4 / 1;
+    display: block;
+    background-color: #fff;
+    box-sizing: border-box;
 }
-
 
 #bottom-panel {
     display: flex;
