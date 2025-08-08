@@ -149,9 +149,9 @@ class Dinosaur {
             if (this.score % 100 === 0) {
                 this.pointSound.currentTime = 0;
                 this.pointSound.play();
-                gameSpeed += 1;
-            } else if (this.score % 5 === 0) {
                 gameSpeed += 0.7;
+            } else if (this.score % 5 === 0) {
+                gameSpeed += 0.3;
             }
 
             // Límite para que no se dispare
@@ -191,29 +191,45 @@ class Dinosaur {
 
 // ===================== Obstáculos (cactus) =====================
 class Obstacle {
-    constructor() {
+    constructor(xOverride = null) {
+        this.sprite = sprite;
+
+        const smallCacti = [
+            { sx: 229, sy: 3, sw: 14, sh: 32 },
+            { sx: 246, sy: 3, sw: 31, sh: 32 },
+            { sx: 280, sy: 3, sw: 48, sh: 32 }
+        ];
+
+        const bigCacti = [
+            { sx: 333, sy: 3, sw: 22, sh: 47 },
+            { sx: 333, sy: 3, sw: 46, sh: 47 },
+            { sx: 358, sy: 3, sw: 71, sh: 47 },
+            { sx: 432, sy: 3, sw: 48, sh: 47 }
+        ];
+
         this.big = Math.random() > 0.5;
-        this.sprite = sprite;  // ✅ corregido
+        const cactusList = this.big ? bigCacti : smallCacti;
+        const listType = this.big ? 'big' : 'small';
 
-        if (this.big) {
-            this.sx = 332;
-            this.sy = 2;
-            this.sw = 25;
-            this.sh = 51;
-            this.w = 25;
-            this.h = 51;
-            this.yOffset = 15;  // bajar 10px
-        } else {
-            this.sx = 228;
-            this.sy = 2;
-            this.sw = 17;
-            this.sh = 36;
-            this.w = 17;
-            this.h = 36;
-            this.yOffset = 7;  // bajar 5px
-        }
+        // Evita repetición consecutiva
+        if (!Obstacle.lastIndex) Obstacle.lastIndex = { small: -1, big: -1 };
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * cactusList.length);
+        } while (newIndex === Obstacle.lastIndex[listType]);
+        Obstacle.lastIndex[listType] = newIndex;
 
-        this.x = canvas.width;
+        const variant = cactusList[newIndex];
+        this.sx = variant.sx;
+        this.sy = variant.sy;
+        this.sw = variant.sw;
+        this.sh = variant.sh;
+
+        this.w = variant.sw;
+        this.h = variant.sh;
+        this.yOffset = this.big ? 12 : 7;
+
+        this.x = xOverride ?? canvas.width;
         this.y = ground.y - this.h + this.yOffset;
     }
 
@@ -222,11 +238,7 @@ class Obstacle {
     }
 
     draw() {
-        ctx.drawImage(
-            this.sprite,
-            this.sx, this.sy, this.sw, this.sh,
-            this.x, this.y, this.w, this.h
-        );
+        ctx.drawImage(this.sprite, this.sx, this.sy, this.sw, this.sh, this.x, this.y, this.w, this.h);
     }
 
     isOffScreen() {
@@ -238,6 +250,86 @@ class Obstacle {
     }
 }
 
+// ===================== Obstáculos (perodáctilo) =====================
+class Pterodactyl {
+    constructor(xOverride = null) {
+        this.sprite = sprite;
+
+        this.frames = [
+            { sx: 136, sy: 10, sw: 46, sh: 40 },
+            { sx: 183, sy: 10, sw: 46, sh: 40 }
+        ];
+
+        this.frameIndex = 0;
+        this.frameTimer = 0;
+        this.frameInterval = 10;
+
+        this.w = this.frames[0].sw;
+        this.h = this.frames[0].sh;
+
+        this.x = xOverride ?? canvas.width;
+
+        const possibleHeights = [2, 18];
+        const heightOffset = possibleHeights[Math.floor(Math.random() * possibleHeights.length)];
+        this.y = ground.y - this.h - heightOffset;
+    }
+
+    update(speed) {
+        this.x -= speed;
+
+        this.frameTimer++;
+        if (this.frameTimer >= this.frameInterval) {
+            this.frameTimer = 0;
+            this.frameIndex = (this.frameIndex + 1) % this.frames.length;
+        }
+    }
+
+    draw() {
+        const frame = this.frames[this.frameIndex];
+        ctx.drawImage(this.sprite, frame.sx, frame.sy, frame.sw, frame.sh, this.x, this.y, frame.sw, frame.sh);
+    }
+
+    isOffScreen() {
+        return this.x + this.w < 0;
+    }
+
+    getBounds() {
+        // Ajuste de hitbox más pequeño (solo parte visible del cuerpo)
+        return {
+            x: this.x + 10,
+            y: this.y + 10,
+            w: this.w - 20,
+            h: this.h - 20
+        };
+    }
+}
+
+// ===================== Generador de obstáculos =====================
+const baseDistances = [613, 729, 570, 684, 622, 745, 657, 588, 702, 735];
+
+function getMinObstacleSpacing(speed) {
+    const multiplier = 10 * Math.sqrt(speed);
+    const base = baseDistances[Math.floor(Math.random() * baseDistances.length)];
+    return base + multiplier;
+}
+
+function generateObstaclePair(speed) {
+    const lastObstacle = obstacles[obstacles.length - 1];
+
+    const spacing = getMinObstacleSpacing(speed);
+    let newX = canvas.width + spacing;
+
+    if (lastObstacle) {
+        const buffer = Math.max(lastObstacle.w, 40);
+        newX = lastObstacle.x + buffer + spacing;
+    }
+
+    const isPtero = Math.random() < 0.12;
+    const newObstacle = isPtero ? new Pterodactyl(newX) : new Obstacle(newX);
+
+    obstacles.push(newObstacle);
+}
+
 // ===================== Mostrar texto en pantalla =====================
 function drawLabels() {
     ctx.fillStyle = "#444";
@@ -245,8 +337,8 @@ function drawLabels() {
 
     if (useAI) {
         // SCORE y HI a la izquierda
-        ctx.fillText("SCORE", 20, 20);
-        ctx.fillText("HI", 20, 60);
+        ctx.fillText("IA SCORE", 20, 20);
+        ctx.fillText("IA HI", 20, 60);
 
         let best = getBestAliveDino();
         if (best) ctx.fillText(best.score.toString().padStart(5, "0"), 20, 40);
@@ -392,7 +484,7 @@ function drawNeuralNetworkSafe(brain) {
     drawNeuralNetwork(brain);
 }
 
-// Actualizar juego
+//! Actualizar juego
 function update() {
     if (paused) return;
 
@@ -401,8 +493,8 @@ function update() {
 
     ground.draw();
 
-    if (frame % 90 === 0) {
-        obstacles.push(new Obstacle());
+    if (obstacles.length === 0 || (canvas.width - obstacles[obstacles.length - 1].x) > getMinObstacleSpacing(gameSpeed)) {
+        generateObstaclePair(gameSpeed);
     }
 
     obstacles.forEach(o => o.update(gameSpeed));
