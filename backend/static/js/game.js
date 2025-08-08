@@ -602,14 +602,22 @@ document.body.addEventListener("click", () => {
     updateUI();
 });
 
-document.body.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // Evita el zoom o scroll
+document.addEventListener("touchstart", (e) => {
+    const ignoredSelectors = ["#aiBtn", "#nn-canvas", "#legend", "button", "a"];
+
+    for (const selector of ignoredSelectors) {
+        if (e.target.closest(selector)) return;
+    }
+
+    e.preventDefault();
+
     if (gameOver) {
         resetGame();
         return;
     }
 
     paused = false;
+
     if (!animationId) {
         animationId = requestAnimationFrame(update);
     }
