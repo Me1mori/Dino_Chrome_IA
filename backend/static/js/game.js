@@ -20,6 +20,7 @@ let currentAlive = 0;
 let score = 0, highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let playerHighScore = localStorage.getItem("playerHighScore") || 0;
 let aiHighScore = localStorage.getItem("aiHighScore") || 0;
+let generationScore = 0;
 
 let animationId = null;
 let paused = true;
@@ -145,6 +146,9 @@ class Dinosaur {
 
         if (frame % 60 === 0 && !this.dead && (isLeader || !useAI)) {
             this.score++;
+            if (useAI && this.score > generationScore) {
+                generationScore = this.score;
+            }
 
             if (this.score % 100 === 0) {
                 this.pointSound.currentTime = 0;
@@ -336,12 +340,14 @@ function drawLabels() {
     ctx.font = "14px 'Press Start 2P'";
 
     if (useAI) {
-        // SCORE y HI a la izquierda
+        // IA SCORE y IA HI a la izquierda
         ctx.fillText("IA SCORE", 20, 20);
         ctx.fillText("IA HI", 20, 60);
 
-        let best = getBestAliveDino();
-        if (best) ctx.fillText(best.score.toString().padStart(5, "0"), 20, 40);
+        // aquí pintamos el score continuo de la generación
+        ctx.fillText(generationScore.toString().padStart(5, "0"), 20, 40);
+
+        // y el récord histórico
         ctx.fillText(aiHighScore.toString().padStart(5, "0"), 20, 80);
 
         // GEN y ALIVE a la derecha
@@ -462,15 +468,16 @@ function resetGame() {
     score = 0;
     aiJumpLocks = [];
 
-    if (useAI) {
-        initBrains();
-    } else {
+    if (!useAI) {
+        generationScore = 0;
         dino = new Dinosaur();
+    } else {
+        initBrains();
     }
 
     gameOver = false;
     document.getElementById("legend").style.display = useAI ? "block" : "none";
-    update(); // ← inicia de cero
+    update();
 }
 
 function updateUI() {
@@ -662,8 +669,9 @@ window.addEventListener("resize", () => {
     }
 });
 
+
 window.onload = () => {
-    resizeGameCanvas(); // ✅ ahora sí se llama correctamente
+    resizeGameCanvas();
     resetGame();
     paused = true;
     update();

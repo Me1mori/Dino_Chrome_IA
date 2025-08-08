@@ -140,7 +140,9 @@ function evolve() {
 
     localStorage.setItem("bestBrain", JSON.stringify(bestBrain.toJSON()));
     localStorage.setItem("generation", generation + 1);
+    generationScore = 0;
     generation++;
+    resetGame();
 
     // nueva población con mutaciones de los 3 mejores
     brains = [];
@@ -164,7 +166,7 @@ function evolve() {
     gameOver = false;
 }
 
-// Red neuronal 
+// Red neuronal
 function drawBrain(brain) {
     if (!brain.lastInput || !brain.lastHidden || !brain.lastOutput) {
         return; // aún no se han generado activaciones
